@@ -17,7 +17,7 @@ Pipeline end-to-end que toma un video cenital de un partido de fútbol robótico
 - **Visualizaciones**: mapa de calor por equipo, gráfica de posesión, shot map, control de espacio y tarjeta-resumen del partido.
 - **Transparencia**: cada métrica reporta sus limitaciones y los sesgos detectados se documentan abiertamente (secciones 7 y 10).
 
-> Cumple los entregables de la convocatoria: flujo de procesamiento (§ 3.5.1), visualización y narrativa de datos (§ 3.5.2) y documentación (§ 3.5.4). La innovación sobre SAM 3 corresponde a la **integración con otros modelos** (§ 3.7.3).
+> Cumple los entregables de la convocatoria: flujo de procesamiento (§ 3.5.1), visualización, narrativa de datos (§ 3.5.2) y documentación (§ 3.5.4). La innovación sobre SAM 3 corresponde a la **integración con otros modelos** (§ 3.7.3).
 
 ## Arquitectura
 
