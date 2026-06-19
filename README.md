@@ -138,7 +138,7 @@ Los scripts del pipeline completo (segmentación, tracking, homografía, equipos
 ## Definiciones (para reproducibilidad)
 
 - **Posesión:** en cada frame con balón visible, posee el robot **más cercano al balón
-  dentro de 30 cm**. La total se calcula sobre los frames con balón; la "cara a cara"
+  dentro de 30 cm desde el centro del robot**. La total se calcula sobre los frames con balón; la "cara a cara"
   solo sobre los frames con **ambos** equipos presentes.
 - **Control de espacio (Voronoi):** cada celda de la cancha se asigna al equipo del robot
   más cercano; se promedia sobre los frames con ambos equipos.
