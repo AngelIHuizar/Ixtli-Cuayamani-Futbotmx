@@ -204,3 +204,6 @@ son responsabilidad y autoría del equipo.
 
 - **2026-06-19**: deadline del entregable de GitHub (repositorio congelado).
 - **2026-06-24 → 26**: Copa FutBotMX presencial (UPIITA-IPN, CDMX).
+## Enlace a videos:
+https://youtu.be/m0kYT9DCMss
+Reel de Instagram : https://www.instagram.com/reel/DZxz9HHRq8IVkyeGNDb-WMts3YTCMizwBDe8vg0/?igsh=MTl2cHdseGFodTBkOA==
