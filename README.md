@@ -328,7 +328,7 @@ Los pesos de SAM 3 **no se incluyen** en el repo; se descargan según la licenci
 
 Este proyecto se distribuye bajo licencia **MIT** (ver `LICENSE`). Las licencias de
 los modelos y bibliotecas de terceros se detallan en
-[`docs/THIRD_PARTY_LICENSES.md`](docs/THIRD_PARTY_LICENSES.md).
+[`docs/THIRD_PARTY_LICENSES.md`](docs/THIRD_PARTY_LICENCES.md).
 
 ## Equipo y créditos
 
