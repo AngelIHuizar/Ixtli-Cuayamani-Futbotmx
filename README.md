@@ -94,16 +94,19 @@ Sobre las trayectorias en coordenadas de cancha se calculan:
 
 **Mapas de calor por equipo.** Histograma 2D de posiciones, suavizado, normalizado por equipo (cada panel a su propio máximo, para comparar *patrones* de juego y no tiempo en cancha, dado que un equipo juega menos por las infracciones). Se excluyen los robots retirados/parados en la orilla mediante un umbral de radio de giro. También agregamos el mapa de calor por jugador. 
 
-## 4. Innovación sobre SAM 3 (requisito Profesional § 3.7.3)
+## 4. Contribución 
 
 - **Integración con otros modelos:** SAM 3 (segmentación abierta) + clasificación de equipos no supervisada (DINOv3 embeddings visuales para clasificación + color-en-máscara con SAM + K-Means ) + homografía geométrica.
 - **Balón con SAM 3:** la detección por concepto evita la confusión con piel/manos que sí afecta a métodos por color (HSV).
 - **Identificación de equipos no supervisada:** por agrupamiento de embeddings — robusta a los cambios de ID del tracker.
+- **Optimización de prompts:** validamos empiricamente que prompts simples (`"small robot"`, score 0.87; `"mini orange ball"`, score 0.91) superan a prompts generalizados (`"robot"`, score 0.34; `"orange ball"`, score 0.44)
 - **Post-procesamiento geométrico:** control de espacio (pitch control) vía diagramas de Voronoi, y dirección de ataque **derivada de los datos** (movimiento del balón en posesión).
 - **Validación cuantitativa y transparencia (§ 3.7.2):** error de homografía medido, verificación visual de equipos, consolidación y validación de eventos, y documentación explícita de los sesgos detectados (secciones 7 y 10).
 
-## 5. Resultados (recorte analizado)
- 
+## 5. Resultados 
+
+Estas métricas resultantes son sobre el recorte analizado. 
+
 | Métrica | Resultado |
 |---|---|
 | Error de homografía | 3.4 cm promedio |
