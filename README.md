@@ -119,53 +119,63 @@ Sobre las trayectorias en coordenadas de cancha se calculan:
 todos los frames con balón; la *cara a cara* (51/49) solo sobre los frames con ambos
 equipos en cancha. El A acumula más posesión total, pero en disputa directa el reparto es parejo.
 
-## Figuras
+## 6. Visualizaciones
 
-| Figura | Archivo |
-|---|---|
-| Mapa de calor por equipo | `outputs/mapa_calor_equipos.png` |
-| Mapa de calor por jugador (2×2) | `outputs/mapa_calor_jugadores.png` |
-| Posesión (total + cara a cara + por jugador) | `outputs/posesion.png` |
-| Control de espacio (Voronoi, snapshot 2v2) | `outputs/voronoi_2v2.png` |
-| Shot map (tiros, llegadas y gol) | `outputs/shot_map.png` |
-| Tarjeta-resumen | `outputs/tarjeta_resumen.png` |
+Generadas con `generar_figuras.py` (en `outputs/`):
+ 
+- `mapa_calor_equipos.png` — ocupación por equipo.
+- `mapa_calor_jugadores.png` — ocupación por jugador (R1/R2).
+- `posesion.png` — posesión total, cara a cara y por jugador.
+- `voronoi_2v2.png` — control de espacio (por equipo y por jugador).
+- `voronoi_acumulado.png` — dominancia de espacio sobre todo el partido.
+- `shot_map.png` — tiros, llegadas y gol.
+- `trayectorias.png` — recorrido de robots y balón.
+- `tarjeta_resumen.png` — resumen del partido.
 
-## Reproducir
-
+## 7. Reproducibilidad
+### Requisitos
+Python 3.11, GPU con CUDA. `torch ≥ 2.7`, `transformers`, `supervision`, `trackers`,
+`scikit-learn`, `opencv-python`, `pandas`, `scipy`, `matplotlib`. Acceso a los
+modelos gated `facebook/sam3` y `facebook/dinov3-convnext-tiny-pretrain-lvd1689m`
+en Hugging Face.
+ 
 ```bash
-# Dependencias
-pip install -r requirements.txt          # numpy, pandas, matplotlib, scipy, ...
-
-# Prueba de humo: valida datos, mapeo de equipos y eventos (sin video ni SAM)
-python smoke_test.py
-
-# Generar las 6 figuras (lee data/, escribe outputs/)
-python generar_figuras.py
+conda create -n futbotmx python=3.11 && conda activate futbotmx
+pip install torch --index-url https://download.pytorch.org/whl/cu121
+pip install -r requirements.txt
 ```
-
-Parámetros de salida (DPI, formato PNG/PDF/SVG) en el bloque de configuración al inicio
-de `generar_figuras.py`. `smoke_test.py` confirma que los CSV cargan, que el mapeo
-track→equipo es correcto (Oscuro = {0,1,15}) y que la detección da 1 gol (Equipo A) y
-2 llegadas.
-
-Los scripts del pipeline completo (segmentación, tracking, homografía, equipos) están en
-`scripts/`, con los módulos reutilizables en `src/`.
+ 
+### Orden de ejecución (desde la raíz)
+```bash
+python calibrar_homografia_multi.py   # -> data/homografia.npy
+python run_tracking.py                # -> trayectorias_final.csv, balon_final.csv, video de mascaras
+python limpiar_datos.py               # -> trayectorias_limpio.csv
+python run_team_id_sd.py              # -> trayectorias_equipos.csv (identificacion de equipos)
+python run_asignar_jugadores.py       # -> trayectorias_jugadores.csv (2 jugadores por equipo)
+python generar_figuras.py             # -> figuras en outputs/
+python generar_video_demo.py          # -> video demo (modo sam: mascaras; modo csv: rapido)
+```
 
 ## Estructura del repositorio
 
 ```
 .
-├── src/            módulos reutilizables (segmentación, tracking, homografía, equipos, eventos)
-├── scripts/        runners del pipeline y de figuras
-├── experiments/    variantes y diagnósticos (método DINO previo, pruebas, verificaciones)
-├── data/           CSV procesados (gitignored salvo entregables)
-├── dataset/        frames y calibración crudos
-├── outputs/        figuras generadas
-├── docs/           THIRD_PARTY_LICENSES, notas de cumplimiento
+├── src/                     segmentation, homography, tracking,
+│                            events, cancha, equipos_robusto, asignar_jugadores...)
+├── tests/                   variantes y diagnósticos
+├── data/                    CSV de trayectorias, balon, homografia
+├── dataset/        
+├── outputs/                 visualizaciones y dashboard
+├── docs/                    THIRD_PARTY_LICENSES.md y documentacion
+├── calibrar_homografia_multi.py
+├── run_tracking.py
+├── limpiar_datos.py
+├── run_team_id_sd.py        (identificacion de equipos por color-en-mascara)
+├── run_asignar_jugadores.py
 ├── generar_figuras.py
-├── smoke_test.py
+├── generar_video_demo.py
 ├── requirements.txt
-├── LICENSE
+├── LICENSE                  (MIT)
 └── README.md
 ```
 
@@ -217,21 +227,17 @@ Texto completo de licencias de terceros en `docs/THIRD_PARTY_LICENSES.md`.
 
 ## Licencia
 
-Código bajo licencia **MIT** (ver `LICENSE`). El uso de SAM 3 se rige por la licencia de
-Meta.
+Este proyecto se distribuye bajo licencia **MIT** (ver `LICENSE`). Las licencias de
+los modelos y bibliotecas de terceros se detallan en
+[`docs/THIRD_PARTY_LICENSES.md`](docs/THIRD_PARTY_LICENSES.md).
 
 ## Equipo y créditos
 
-**Ixtli-Cuayamani** — Categoría Profesional, INAOE:
+Equipo **Ixtli-Cuayamani** — Cristina, Ángel y Miguel.
+Modelos: SAM 3 y DINOv3 (Meta AI). Dimensiones de cancha según el Reglamento oficial
+de la Copa FutBotMX 2026.
 
-| Integrante | Rol |
-|---|---|
-| Cristina Pérez Ramos | Integrante |
-| Ángel Itzcoatl Huizar Bretado | Integrante |
-| Miguel Galicia Cuamatzi | Integrante |
-
-Asistencia con LLM (autorizada en la convocatoria): se usó Claude (Anthropic) para apoyo
-en código, depuración y documentación. El diseño técnico, las decisiones y la validación
+Asistencia con LLM: se usó Claude (Anthropic) para apoyo en depuración y documentación, Gemini para generar la imagen del logo del equipo que se incluye en los videos. El diseño técnico, las decisiones y la validación
 son responsabilidad y autoría del equipo.
 
 ## Calendario
