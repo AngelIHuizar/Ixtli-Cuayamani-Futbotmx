@@ -4,8 +4,11 @@
 **Equipo:** Cristina Pérez Ramos, Ángel Itzcoatl Huizar Bretado y Miguel Galicia Cuamatzi.
 
 Sistema de visión para la segmentacion, rastreo y análisis de partidos de fútbol robótico a partir de video de un partido grabado con vista cenital. Integra **SAM 3** para segmentación de vocabulario abierto, **DINOv3** para identificación de equipos y **homografía** para proyectar los datos a coordenadas reales de la cancha. Como resultado, genera analíticas deportivas como: posesión por equipo, mapas de calor, control de espacio, tiros y goles.
+
 🎥 **Video demo:** https://www.youtube.com/watch?v=m0kYT9DCMss
+
 📱 **Reel:** https://www.instagram.com/reel/DZxz9HHRq8IVkyeGNDb-WMts3YTCMizwBDe8vg0/
+
 📊 **Dashboard:** abrir `dashboard.html` en el navegador
 
 ## TL;DR
@@ -23,7 +26,20 @@ Resultado del partido analizado:
  
 > *"El equipo B, aunque disputó el balón de forma pareja, el equipo A ganó territorio, tiro a gol y el gol."*.
 
-## Arquitectura
+## 1. El reto y el dataset
+ 
+Ixtli Cuayamani participa en la **categoría profesional**.
+ 
+**Cancha (Reglamento Copa FutBotMX 2026):** 243 cm de largo × 182 cm de ancho.
+Portería **amarilla** en un extremo (y = 0) y **azul** en el otro (y = 243), de
+60 cm de ancho. Áreas de penalti de 25 cm × 80 cm. El reglamento prohíbe los
+colores naranja/amarillo/azul en los robots, por lo que **el balón naranja es el
+único objeto naranja del campo**.
+ 
+**Dataset:** video cenital de cámara fija, tomado del dataset del concurso. El análisis se hace sobre un **recorte
+representativo de ~2 minutos (3607 frames a 30 fps)**, recorte del video IMG_9933.mov (videos/18abril/camara_superior - del dataset)
+
+## 2. Arquitectura
 
 ```
 video (cámara superior cenital · recorte ~2 min)
@@ -43,6 +59,17 @@ video (cámara superior cenital · recorte ~2 min)
         ▼
 [métricas+eventos]  posesión · Voronoi · llegadas · tiros a gol · goles  →  figuras
 ```
+## 3. Metodología por etapa
+
+### 4.1 Segmentación con SAM 3
+SAM 3 se usa por su ruta nativa en `transformers` (`Sam3Processor` / `Sam3Model`). Los robots se segmentan con el prompt de texto `"small robot"` (umbral 0.25), que superó al prompt `"robot"`. SAM 3 separa robots en colisión en lugar de fusionarlos. El balón se detecta con `"mini orange ball"` (umbral 0.35), que mejora la confianza de detección frente a `"orange ball"` (~0.4 → ~0.7 en frames con balón visible). Las manos de los participantes se filtran restando el prompt `"hand"` por solapamiento (IoU) y por la persistencia temporal del seguimiento.
+
+### 4.2 Seguimiento (tracking)
+Se asigna a cada robot un identificador persistente con **ByteTrack** (paquete `trackers`). La posición de cada robot es el centroide de su máscara, que en vista cenital, coincide con su punto de contacto siendo es estable ante rotaciones y colisiones. 
+
+### 4.3 Homografía
+La calibración se realiza con **7 puntos** (esquinas visibles + postes de portería, ya que la esquina superior-derecha no
+aparece en cuadro) mediante `cv2.findHomography`, repartiendo el error de reproyección (promedio: 3.4 cm) sobre una cancha de 243 × 182 cm — menos de un tercio del tamaño de un robot.
 
 ## Identificación de equipos (decisión de diseño)
 
