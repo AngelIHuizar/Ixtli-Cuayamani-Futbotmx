@@ -293,8 +293,11 @@ los modelos y bibliotecas de terceros se detallan en
 ## Equipo y créditos
 
 Equipo **Ixtli-Cuayamani** — Cristina, Ángel y Miguel.
+
 Modelos: SAM 3 y DINOv3 (Meta AI). Dimensiones de cancha según el Reglamento oficial
 de la Copa FutBotMX 2026.
 
 Asistencia con LLM: se usó Claude (Anthropic) para apoyo en depuración y documentación, Gemini para generar la imagen del logo del equipo que se incluye en los videos. El diseño técnico, código y la validación
 son responsabilidad y autoría del equipo.
+
+![Texto alternativo](main/outputs/Figure_1.png)
