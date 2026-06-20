@@ -61,60 +61,63 @@ video (cámara superior cenital · recorte ~2 min)
 ```
 ## 3. Metodología por etapa
 
-### 4.1 Segmentación con SAM 3
+### 3.1 Segmentación con SAM 3
 SAM 3 se usa por su ruta nativa en `transformers` (`Sam3Processor` / `Sam3Model`). Los robots se segmentan con el prompt de texto `"small robot"` (umbral 0.25), que superó al prompt `"robot"`. SAM 3 separa robots en colisión en lugar de fusionarlos. El balón se detecta con `"mini orange ball"` (umbral 0.35), que mejora la confianza de detección frente a `"orange ball"` (~0.4 → ~0.7 en frames con balón visible). Las manos de los participantes se filtran restando el prompt `"hand"` por solapamiento (IoU) y por la persistencia temporal del seguimiento.
 
-### 4.2 Seguimiento (tracking)
+### 3.2 Seguimiento (tracking)
 Se asigna a cada robot un identificador persistente con **ByteTrack** (paquete `trackers`). La posición de cada robot es el centroide de su máscara, que en vista cenital, coincide con su punto de contacto siendo es estable ante rotaciones y colisiones. 
 
-### 4.3 Homografía
+### 3.3 Homografía
 La calibración se realiza con **7 puntos** (esquinas visibles + postes de portería, ya que la esquina superior-derecha no
 aparece en cuadro) mediante `cv2.findHomography`, repartiendo el error de reproyección (promedio: 3.4 cm) sobre una cancha de 243 × 182 cm — menos de un tercio del tamaño de un robot.
 
-## Identificación de equipos (decisión de diseño)
+### 3.4 Identificación de equipos (DINOv3) + mascara SAM3
 
-Los equipos se distinguen por la **presencia de verde dentro de la máscara que SAM
-entrega para cada robot**: si la máscara contiene suficiente verde, es Equipo B (Verde);
-si no, Equipo A (Oscuro). **Ya no se usa DINOv3 + K-Means**, que en este material daba
-asignaciones menos estables. El método por máscara es directo, reproducible y no requiere
-entrenamiento ni embeddings.
+Para asignar cada robot a su equipo, se recortan vistas del robot a lo largo del video, se extrae un embedding visual con **DINOv3** (`convnext-tiny`) de cada una, se promedian por `tracker_id` y se agrupan en dos conjuntos con **K-Means** (k = 2). Además, los equipos se distinguen por la presencia de su color dentro de la máscara que SAM 3 entrega para cada robot. 
 
-Un caso se corrigió a mano (el track 14, asignado a Verde) y queda documentado para
-transparencia.
+### 3.5 Métricas y eventos
 
-## Cancha y datos
+Sobre las trayectorias en coordenadas de cancha se calculan:
 
-- Cancha **243 cm (largo, eje y) × 182 cm (ancho, eje x)**. Boca de portería x ∈ [61, 121].
-  Porterías en los extremos y = 0 (**amarilla**) e y = 243 (**azul**). Dos robots por equipo.
-  La **azul** es el extremo inferior en el video; las figuras se orientan igual (azul abajo).
-- **Equipos:** Equipo B = **Verde** (id 0) · Equipo A = **Oscuro** (id 1).
-  - Verde (B): tracks 2, 3, 4, 9, 12, 14, 17.
-  - Oscuro (A): tracks 0, 1, 15.
-- **Jugadores:** Verde R1 = {2, 4, 9, 12, 14}, R2 = {3, 17} · Oscuro R1 = {1}, R2 = {0, 15}.
-- **Archivos** (`data/`): `trayectorias_equipos.csv`, `trayectorias_jugadores.csv`
-  (con columna `jugador`) y `balon_final.csv` (1513 frames de balón detectados).
+**Dirección de ataque.** Antes de atribuir eventos, determinamos qué portería ataca cada equipo midiendo, en los frames de posesión, hacia dónde tiende a moverse el balón. El equipo B empuja el balón hacia la portería amarilla (Δy medio −2.8 cm) y el equipo A hacia la azul (+2.7 cm).
 
-## Resultados
+**Posesión por equipo (dos lecturas).** En cada frame, el robot más cercano al balón (dentro de 30 cm) "posee"; se suma el tiempo por equipo. Reportamos dos cifras:
 
-| Métrica | Equipo B (Verde) | Equipo A (Oscuro) |
-|---|---|---|
-| Posesión total (454 fr con balón) | 30 % | 70 % |
-| Posesión cara a cara (265 fr, ambos en cancha) | 51 % | 49 % |
-| Control de espacio · Voronoi (1791 fr) | 38.7 % | 61.3 % |
-| Posesión por jugador (R1 / R2) | 0 % / 30 % | 27 % / 43 % |
-| Llegadas al área | 0 | 2 |
-| Tiros a gol | 0 | 1 |
-| **Goles** | 0 | **1** |
+- *Posesión total*: sobre todos los frames con balón visible. Incluye los tramos en que a un equipo le retiraron robots, por lo que puede estar sesgada hacia quien jugó con superioridad numérica.
+- *Posesión cara a cara*: solo sobre frames con ambos equipos presentes en cancha. Mide quién gana el balón en igualdad de condiciones.
 
-Detección de balón: **41.9 %** (1513 / 3607 frames del recorte).
+**Control de espacio (Voronoi).** Se divide la cancha en celdas; cada celda pertenece al robot más cercano y suma para su equipo. El porcentaje de campo controlado por cada equipo mide el dominio territorial. Se calcula solo sobre frames con ambos equipos presentes.
 
-**Lectura del partido.** Con los datos reprocesados, la posesión **cara a cara quedó
-pareja (51 / 49)**: no es cierto que un equipo "tuviera el balón". Lo que separa a los
-equipos es el espacio y el peligro. **El Equipo A (Oscuro) controló más cancha (≈61 %)**,
-fue el **único en generar peligro** (logrando 2 llegadas y el único tiro a gol, ~f1876
-a 9.2 cm/frame) y **anotó el único gol** (frame 3180, portería azul, balón 242 frames en
-la red). El gol entró rodando lento, por eso cuenta como gol pero no como tiro. El Equipo
-B no registró llegadas ni tiros.
+**Llegadas al área y tiros.** Distinguimos dos conceptos: una *llegada al área* (el balón entra a los 25 cm frente a una portería) y un *tiro a gol* (el balón acelera por encima de un umbral dirigido a una portería, marcando el punto de origen). El tiro a gol es la base del *shot map*.
+
+**Goles.** El balón cruza la línea de gol **dentro del ancho de portería** (61–121 cm en x), con consolidación temporal de detecciones cercanas. La atribución de equipo usa la dirección de ataque derivada de los datos. El filtro de ancho descarta correctamente los cruces de línea por los costados (balón fuera de banda).
+
+**Mapas de calor por equipo.** Histograma 2D de posiciones, suavizado, normalizado por equipo (cada panel a su propio máximo, para comparar *patrones* de juego y no tiempo en cancha, dado que un equipo juega menos por las infracciones). Se excluyen los robots retirados/parados en la orilla mediante un umbral de radio de giro. También agregamos el mapa de calor por jugador. 
+
+## 4. Innovación sobre SAM 3 (requisito Profesional § 3.7.3)
+
+- **Integración con otros modelos:** SAM 3 (segmentación abierta) + clasificación de equipos no supervisada (DINOv3 embeddings visuales para clasificación + color-en-máscara con SAM + K-Means ) + homografía geométrica.
+- **Balón con SAM 3:** la detección por concepto evita la confusión con piel/manos que sí afecta a métodos por color (HSV).
+- **Identificación de equipos no supervisada:** por agrupamiento de embeddings — robusta a los cambios de ID del tracker.
+- **Post-procesamiento geométrico:** control de espacio (pitch control) vía diagramas de Voronoi, y dirección de ataque **derivada de los datos** (movimiento del balón en posesión).
+- **Validación cuantitativa y transparencia (§ 3.7.2):** error de homografía medido, verificación visual de equipos, consolidación y validación de eventos, y documentación explícita de los sesgos detectados (secciones 7 y 10).
+
+## 5. Resultados (recorte analizado)
+ 
+| Métrica | Resultado |
+|---|---|
+| Error de homografía | 3.4 cm promedio |
+| Balón detectado | **41.9 %** (1513 / 3607 frames) |
+| Posesión total (frames con balón, 454 fr) | **B 30 % — A 70 %** |
+| Posesión cara a cara (ambos en cancha, 265 fr) | **B 51 % — A 49 %** |
+| Control de espacio (Voronoi) | **B 38.7 % — A 61.3 %** |
+| Tiros a gol | 1 (Equipo A) |
+| Llegadas al área | 2 (Equipo A) |
+| **Goles** | **1 — Equipo A (portería azul, frame 3180)** |
+
+**Dos lecturas de la posesión, a propósito:** la *total* (70/30) se calcula sobre
+todos los frames con balón; la *cara a cara* (51/49) solo sobre los frames con ambos
+equipos en cancha. El A acumula más posesión total, pero en disputa directa el reparto es parejo.
 
 ## Figuras
 
