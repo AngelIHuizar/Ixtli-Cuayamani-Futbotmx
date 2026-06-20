@@ -40,6 +40,9 @@ colores naranja/amarillo/azul en los robots, por lo que **el balón naranja es e
 **Dataset:** video cenital de cámara fija, tomado del dataset del concurso. El análisis se hace sobre un **recorte
 representativo de ~2 minutos (3607 frames a 30 fps)**, recorte del video IMG_9933.mov [Dataset: videos/18abril/camara_superior (Google Drive)](https://drive.google.com/drive/folders/1CeHLUE6XmDyxHn_hVlnO6HVvENyr2P2R)
 
+📁 **Dataset oficial:** [videos/18abril/camara_superior (Google Drive)](https://drive.google.com/drive/folders/1TF7-P4rAwPmHFw_TjmNfFU3ORxqnp8CD)
+
+
 ## 2. Arquitectura
 
 ```
