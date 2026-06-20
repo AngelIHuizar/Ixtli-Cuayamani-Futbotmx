@@ -129,25 +129,52 @@ equipos en cancha. El A acumula más posesión total, pero en disputa directa el
 
 ## 6. Visualizaciones
 
-Generadas con `generar_figuras.py` (en `outputs/`):
+Todas se generan con `generar_figuras.py` y se guardan en `outputs/`.
  
-- `mapa_calor_equipos.png` — ocupación por equipo.
-- `mapa_calor_jugadores.png` — ocupación por jugador (R1/R2).
-- `posesion.png` — posesión total, cara a cara y por jugador.
-- `voronoi_2v2.png` — control de espacio (por equipo y por jugador).
-- `voronoi_acumulado.png` — dominancia de espacio sobre todo el partido.
-- `shot_map.png` — tiros, llegadas y gol.
-- `trayectorias.png` — recorrido de robots y balón.
-- `tarjeta_resumen.png` — resumen del partido.
+<p align="center">
+  <b>Resumen del partido.</b> Marcador, posesión, control de espacio y actividad ofensiva en una sola tarjeta.
+  <br><br>
+  <img src="outputs/tarjeta_resumen.png" alt="Tarjeta resumen del partido" width="60%" />
+</p>
+ 
+<table align="center">
+  <tr>
+    <td align="center" valign="top" width="55%">
+      <p><b>Mapa de calor por equipo.</b> Zonas de mayor ocupación de cada equipo a lo largo del partido.</p>
+      <img src="outputs/mapa_calor_equipos.png" alt="Mapa de calor por equipo" width="100%" />
+    </td>
+    <td align="center" valign="top" width="45%">
+      <p><b>Mapa de calor por jugador.</b> La misma ocupación, desglosada por cada uno de los dos robots de cada equipo (R1/R2).</p>
+      <img src="outputs/mapa_calor_jugadores.png" alt="Mapa de calor por jugador" width="75%" />
+    </td>
+  </tr>
+</table>
 
-![Texto alternativo](outputs/mapa_calor_equipos.png)
-![Texto alternativo](outputs/mapa_calor_jugadores.png)
-![Texto alternativo](outputs/posesion.png)
-![Texto alternativo](outputs/voronoi_2v2.png)
-![Texto alternativo](outputs/voronoi_acumulado.png)
-![Texto alternativo](outputs/shot_map.png)
-![Texto alternativo](outputs/trayectorias.png)
-![Texto alternativo](outputs/tarjeta_resumen.png)
+
+<p align="center">
+  <b>Posesión del balón.</b> Posesión total, cara a cara (ambos equipos en cancha) y desglose por jugador.
+  <br><br>
+  <img src="outputs/posesion.png" alt="Posesión del balón" width="65%" />
+</p>
+ 
+<p align="center">
+  <b>Control de espacio (Voronoi).</b> Reparto del territorio en un frame 2v2, por equipo y por jugador.
+  <br><br>
+  <img src="outputs/voronoi_2v2.png" alt="Control de espacio Voronoi 2v2" width="65%" />
+</p>
+ 
+<table align="center">
+  <tr>
+    <td align="center" valign="top" width="55%">
+      <p><b>Shot map.</b> Tiros a gol, llegadas al área y el gol, sobre la cancha.</p>
+      <img src="outputs/shot_map.png" alt="Shot map" width="100%" />
+    </td>
+    <td align="center" valign="top" width="45%">
+      <p><b>Trayectorias.</b> Recorrido completo de los robots (por equipo) y del balón durante el partido.</p>
+      <img src="outputs/trayectorias.png" alt="Trayectorias" width="75%" />
+    </td>
+  </tr>
+</table>
 
 ## 7. Instalación
  
