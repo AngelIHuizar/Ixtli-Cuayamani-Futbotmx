@@ -45,24 +45,12 @@ representativo de ~2 minutos (3607 frames a 30 fps)**, recorte del video IMG_993
 
 ## 2. Arquitectura
 
-```
-video (cámara superior cenital · recorte ~2 min)
-        │
-        ▼
-[segmentación]   SAM 3 · prompts "small robot" / "mini orange ball" (umbral 0.35)
-        │
-        ▼
-[tracking]       ByteTrack · IDs persistentes por frame (robots y balón)
-        │
-        ▼
-[homografía]     7 puntos · imagen → cancha en cm (error de reproyección ≈ 3.4 cm)
-        │
-        ▼
-[equipos]        verde dentro de la máscara de SAM → Equipo B (Verde) / Equipo A (Oscuro)
-        │
-        ▼
-[métricas+eventos]  posesión · Voronoi · llegadas · tiros a gol · goles  →  figuras
-```
+<p align="center">
+  <b>Arquitectura del Sistema.</b> Pipeline visual y flujo de procesamiento de datos del proyecto Ixtli-Cuayamani.
+  <br><br>
+  <img src="outputs/arquitectura.png" alt="Arquitectura del Sistema" width="45%" />
+</p>
+
 ## 3. Metodología por etapa
 
 ### 3.1 Segmentación con SAM 3
