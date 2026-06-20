@@ -179,6 +179,16 @@ Todas se generan con `generar_figuras.py` y se guardan en `outputs/`.
   </tr>
 </table>
 
+<p align="center">
+  <b>Dashboard interactivo.</b> Resumen del partido en una página web (marcador, posesión, control de espacio y actividad ofensiva). Se abre con doble clic en cualquier navegador, sin servidor.
+  <br><br>
+  <a href="dashboard.html">
+    <img src="outputs/dashboard.png" alt="Dashboard Interactivo" width="75%" />
+  </a>
+  <br><br>
+  ➡️ <b><a href="dashboard.html">Abrir dashboard.html en el repositorio</a></b>
+</p>
+
 ## 7. Instalación
  
 Verificado en **Windows** con GPU NVIDIA (CUDA 13.2). El dispositivo se autodetecta
