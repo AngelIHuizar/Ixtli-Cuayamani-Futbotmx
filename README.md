@@ -38,7 +38,7 @@ colores naranja/amarillo/azul en los robots, por lo que **el balón naranja es e
 único objeto naranja del campo**.
  
 **Dataset:** video cenital de cámara fija, tomado del dataset del concurso. El análisis se hace sobre un **recorte
-representativo de ~2 minutos (3607 frames a 30 fps)**, recorte del video IMG_9933.mov ([videos/18abril/camara_superior - del dataset](https://drive.google.com/drive/folders/1CeHLUE6XmDyxHn_hVlnO6HVvENyr2P2R))
+representativo de ~2 minutos (3607 frames a 30 fps)**, recorte del video IMG_9933.mov [Dataset: videos/18abril/camara_superior (Google Drive)](https://drive.google.com/drive/folders/1CeHLUE6XmDyxHn_hVlnO6HVvENyr2P2R)
 
 ## 2. Arquitectura
 
