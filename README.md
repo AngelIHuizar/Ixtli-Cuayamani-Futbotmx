@@ -139,6 +139,15 @@ Generadas con `generar_figuras.py` (en `outputs/`):
 - `trayectorias.png` — recorrido de robots y balón.
 - `tarjeta_resumen.png` — resumen del partido.
 
+![Texto alternativo](outputs/mapa_calor_equipos.png)
+![Texto alternativo](outputs/mapa_calor_jugadores.png)
+![Texto alternativo](outputs/posesion.png)
+![Texto alternativo](outputs/voronoi_2v2.png)
+![Texto alternativo](outputs/voronoi_acumulado.png)
+![Texto alternativo](outputs/shot_map.png)
+![Texto alternativo](outputs/trayectorias.png)
+![Texto alternativo](outputs/tarjeta_resumen.png)
+
 ## 7. Instalación
  
 Verificado en **Windows** con GPU NVIDIA (CUDA 13.2). El dispositivo se autodetecta
@@ -299,5 +308,3 @@ de la Copa FutBotMX 2026.
 
 Asistencia con LLM: se usó Claude (Anthropic) para apoyo en depuración y documentación, Gemini para generar la imagen del logo del equipo que se incluye en los videos. El diseño técnico, código y la validación
 son responsabilidad y autoría del equipo.
-
-![Texto alternativo](main/outputs/Figure_1.png)
