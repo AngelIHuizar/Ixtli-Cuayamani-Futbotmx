@@ -75,6 +75,10 @@ aparece en cuadro) mediante `cv2.findHomography`, repartiendo el error de reproy
 
 Para asignar cada robot a su equipo, se recortan vistas del robot a lo largo del video, se extrae un embedding visual con **DINOv3** (`convnext-tiny`) de cada una, se promedian por `tracker_id` y se agrupan en dos conjuntos con **K-Means** (k = 2). Además, los equipos se distinguen por la presencia de su color dentro de la máscara que SAM 3 entrega para cada robot. 
 
+**Asignación de jugadores.** Dentro de cada equipo se reconstruyen los 2 robots
+físicos a partir de los fragmentos de ID, usando la regla de que dos tracks que
+coexisten en un frame son robots distintos.
+
 ### 3.5 Métricas y eventos
 
 Sobre las trayectorias en coordenadas de cancha se calculan:
@@ -135,20 +139,77 @@ Generadas con `generar_figuras.py` (en `outputs/`):
 - `trayectorias.png` — recorrido de robots y balón.
 - `tarjeta_resumen.png` — resumen del partido.
 
-## 7. Reproducibilidad
+## 7. Instalación
+ 
+Verificado en **Windows** con GPU NVIDIA (CUDA 13.2). El dispositivo se autodetecta
+(`cuda` si hay GPU, si no `cpu`).
+ 
+**1. Clonar el repositorio**
+```
+git clone https://github.com/AngelIHuizar/Ixtli-Cuayamani-Futbotmx.git
+cd Ixtli-Cuayamani-Futbotmx
+```
+ 
+**2. Crear el entorno (Python 3.11)**
+```
+conda create -n futbotmx python=3.11
+conda activate futbotmx
+```
+ 
+**3. PyTorch (según tu versión de CUDA)**
+```
+# Windows/Linux con GPU NVIDIA (ajusta el índice a tu CUDA):
+pip install torch==2.12.0 torchvision==0.27.0 --index-url https://download.pytorch.org/whl/cu132
+ 
+# CPU-only (más lento):
+pip install torch torchvision
+```
+ 
+**4. Dependencias**
+```
+pip install -r requirements.txt
+```
+ 
+**5. Modelos gated en Hugging Face**
+ 
+SAM 3 y DINOv3 requieren aceptar sus términos en Hugging Face. Inicia sesión con un
+token de lectura y acepta los términos de cada modelo (los pesos se descargan solos
+en la primera ejecución):
+```
+huggingface-cli login --token <TU_TOKEN>
+# Aceptar términos en:
+#   https://huggingface.co/facebook/sam3
+#   https://huggingface.co/facebook/dinov3-convnext-tiny-pretrain-lvd1689m
+```
+
+### Hardware utilizado
+
+El desarrollo y pruebas se realizaron y ejecutaron en una laptop:
+
+- **Windows** · NVIDIA GeForce **RTX 4060 Laptop (8 GB VRAM)** · CUDA 13.2
+- **Python 3.11** · torch 2.12.0 · transformers 5.10.2
+- El dispositivo se autodetecta (`cuda` si hay GPU, si no `cpu`).
+
+Las etapas con SAM 3 (tracking del video, generación del video demo) son las más
+costosas: el reprocesamiento completo del recorte toma ~2.5–3 h en esta GPU. Las
+etapas de métricas y figuras corren en minutos sin demanda significativa de GPU.
+
+## 8. Reproducibilidad
 ### Requisitos
 Python 3.11, GPU con CUDA. `torch ≥ 2.7`, `transformers`, `supervision`, `trackers`,
 `scikit-learn`, `opencv-python`, `pandas`, `scipy`, `matplotlib`. Acceso a los
 modelos gated `facebook/sam3` y `facebook/dinov3-convnext-tiny-pretrain-lvd1689m`
 en Hugging Face.
- 
+
 ```bash
 conda create -n futbotmx python=3.11 && conda activate futbotmx
 pip install torch --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 ```
- 
-### Orden de ejecución (desde la raíz)
+Coloca el video del partido en `dataset/camara_superior/` y corre el pipeline en
+orden (desde la raíz del proyecto).
+
+### Orden de ejecución
 ```bash
 python calibrar_homografia_multi.py   # -> data/homografia.npy
 python run_tracking.py                # -> trayectorias_final.csv, balon_final.csv, video de mascaras
@@ -158,6 +219,14 @@ python run_asignar_jugadores.py       # -> trayectorias_jugadores.csv (2 jugador
 python generar_figuras.py             # -> figuras en outputs/
 python generar_video_demo.py          # -> video demo (modo sam: mascaras; modo csv: rapido)
 ```
+
+Salidas:
+- `data/trayectorias_*.csv`, `data/balon_final.csv` — trayectorias y balón.
+- `outputs/*.png` — figuras (mapas de calor, posesión, Voronoi, shot map, trayectorias).
+- El video demo (modo sam) — segmentación superpuesta por equipo.
+- `dashboard.html` — resumen interactivo del partido.
+> Los scripts ejecutables viven en la raíz; los módulos en `src/`. Ejecutar siempre
+> desde la raíz del proyecto.
 
 ## Estructura del repositorio
 
@@ -196,37 +265,24 @@ python generar_video_demo.py          # -> video demo (modo sam: mascaras; modo 
 - **Gol:** el balón cruza la línea dentro del ancho del arco y **se sostiene ≥ 30 frames**
   detrás de ella (rechaza cruces breves).
 
-## Limitaciones y caveats
-
-- **Detección de balón 41.9 %.** El balón se ve en 1513 de 3607 frames; los huecos se
-  ignoran/interpolan según la métrica. Las líneas largas y rectas del shot map son tramos
-  entre detecciones separadas, no movimiento real.
-- **Sesgo de detección hacia el Verde** y **recorte con fase sin juego**: pueden afectar
-  las cuentas absolutas.
-- **Verde R1 = 0 % de posesión** lleva caveat: ese "jugador" agrupa **5 tracks
-  fragmentados** ({2,4,9,12,14}); su 0 % puede deberse a *ID switches*, no necesariamente
-  a inactividad real.
-- **Falso positivo de gol (frame 416):** el balón cruza ~13 frames y vuelve a jugarse; se
-  **rechaza** con el criterio de sostenimiento ≥ 30 frames. El gol real (3180, 242 frames)
-  se conserva.
-- **Tiros a gol** depende del umbral de velocidad; con el criterio reportado da 1 (el
-  remate de f1876 aparece con cualquier umbral razonable).
-- **Geometría (confirmada con el video):** la azul está en y=243 (parte inferior del
-  video) y la amarilla en y=0. El gol y las llegadas ocurren en la azul, atacada y anotada
-  por el Equipo A (Oscuro).
-
 ## Atribución de dependencias
 
-| Dependencia | Rol | Licencia |
+| Dependencia | Rol en el proyecto | Licencia |
 |---|---|---|
-| SAM 3 (Meta) | Segmentación base de robots y balón | Meta SAM License (**no MIT**) |
-| ByteTrack / supervision | Seguimiento multi-objeto | MIT |
-| OpenCV | IO de video y homografía | Apache 2.0 |
-| NumPy · pandas · SciPy | Cómputo y procesamiento de datos | BSD |
-| Matplotlib | Figuras (mapas de calor, Voronoi, shot map) | Matplotlib (estilo BSD) |
+| **SAM 3** (Meta) | Segmentación de robots y balón (prompts de texto) | Meta SAM License |
+| **DINOv3** (Meta) | Identificación de equipos por embeddings | Licencia DINOv3 (Meta) |
+| transformers (HF) | Inferencia de SAM 3 y DINOv3 | Apache 2.0 |
+| torch / torchvision | Backend de deep learning | BSD-3-Clause |
+| supervision (Roboflow) | Anotadores y estructura de detecciones | MIT |
+| trackers (Roboflow) | Seguimiento ByteTrack | Apache 2.0 |
+| scikit-learn | K-Means (agrupamiento de equipos) | BSD-3-Clause |
+| opencv-python | E/S de video, dibujo, espacio de color HSV | Apache 2.0 |
+| pandas / numpy | Manejo de datos y cómputo | BSD-3-Clause |
+| scipy | Diagramas de Voronoi (control de espacio) | BSD-3-Clause |
+| matplotlib | Mapas de calor, trayectorias, Voronoi, figuras | Matplotlib (estilo BSD) |
+| pillow | Conversión de imágenes para los modelos | HPND |
 
 Los pesos de SAM 3 **no se incluyen** en el repo; se descargan según la licencia de Meta.
-Texto completo de licencias de terceros en `docs/THIRD_PARTY_LICENSES.md`.
 
 ## Licencia
 
@@ -240,13 +296,5 @@ Equipo **Ixtli-Cuayamani** — Cristina, Ángel y Miguel.
 Modelos: SAM 3 y DINOv3 (Meta AI). Dimensiones de cancha según el Reglamento oficial
 de la Copa FutBotMX 2026.
 
-Asistencia con LLM: se usó Claude (Anthropic) para apoyo en depuración y documentación, Gemini para generar la imagen del logo del equipo que se incluye en los videos. El diseño técnico, las decisiones y la validación
+Asistencia con LLM: se usó Claude (Anthropic) para apoyo en depuración y documentación, Gemini para generar la imagen del logo del equipo que se incluye en los videos. El diseño técnico, código y la validación
 son responsabilidad y autoría del equipo.
-
-## Calendario
-
-- **2026-06-19**: deadline del entregable de GitHub (repositorio congelado).
-- **2026-06-24 → 26**: Copa FutBotMX presencial (UPIITA-IPN, CDMX).
-## Enlace a videos:
-https://youtu.be/m0kYT9DCMss
-Reel de Instagram : https://www.instagram.com/reel/DZxz9HHRq8IVkyeGNDb-WMts3YTCMizwBDe8vg0/?igsh=MTl2cHdseGFodTBkOA==
