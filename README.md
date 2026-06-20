@@ -1,6 +1,7 @@
 # Ixtli-Cuayamani · Análisis de Fútbol Robótico con SAM 3
 
 **Copa FutBotMX-Meta 2026 — Capítulo Visión por Computadora — Categoría Profesional**
+
 **Equipo:** Cristina Pérez Ramos, Ángel Itzcoatl Huizar Bretado y Miguel Galicia Cuamatzi.
 
 Sistema de visión para la segmentacion, rastreo y análisis de partidos de fútbol robótico a partir de video de un partido grabado con vista cenital. Integra **SAM 3** para segmentación de vocabulario abierto, **DINOv3** para identificación de equipos y **homografía** para proyectar los datos a coordenadas reales de la cancha. Como resultado, genera analíticas deportivas como: posesión por equipo, mapas de calor, control de espacio, tiros y goles.
