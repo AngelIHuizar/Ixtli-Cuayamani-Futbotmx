@@ -1,23 +1,27 @@
 # Ixtli-Cuayamani · Análisis de Fútbol Robótico con SAM 3
 
 **Copa FutBotMX-Meta 2026 — Capítulo Visión por Computadora — Categoría Profesional**
+**Equipo:** Cristina Pérez Ramos, Ángel Itzcoatl Huizar Bretado y Miguel Galicia Cuamatzi.
 
 Sistema de visión para la segmentacion, rastreo y análisis de partidos de fútbol robótico a partir de video de un partido grabado con vista cenital. Integra **SAM 3** para segmentación de vocabulario abierto, **DINOv3** para identificación de equipos y **homografía** para proyectar los datos a coordenadas reales de la cancha. Como resultado, genera analíticas deportivas como: posesión por equipo, mapas de calor, control de espacio, tiros y goles.
-
-**Equipo:** Cristina Pérez Ramos, Ángel Itzcoatl Huizar Bretado y Miguel Galicia Cuamatzi.
+🎥 **Video demo:** https://www.youtube.com/watch?v=m0kYT9DCMss
+📱 **Reel:** https://www.instagram.com/reel/DZxz9HHRq8IVkyeGNDb-WMts3YTCMizwBDe8vg0/
+📊 **Dashboard:** abrir `dashboard.html` en el navegador
 
 ## TL;DR
 
-Pipeline end-to-end que toma un video cenital de un partido de fútbol robótico y produce:
+A partir de un recorte de 2 minutos de un partido, el sistema detecta y rastrea los robots y el balón, identifica el equipo de cada robot sin etiquetas, y produce métricas cuantitativas. 
 
-- **Segmentación** de robots (`"small robot"`) y balón (`"mini orange ball"`) con **SAM 3**, separando robots en colisión y filtrando manos del árbitro.
-- **Seguimiento** con ByteTrack (IDs persistentes) e **identificación de equipos no supervisada** con embeddings **DINOv3** + K-Means (sin etiquetas, robusta a cambios de ID).
+- **Segmentación** de robots (`"small robot"`) y balón (`"mini orange ball"`) con **SAM 3**, separando robots en colisión y filtrando manos del árbitro o integrantes del equipo.
+- **Seguimiento** con ByteTrack (IDs persistentes) e **identificación de equipos no supervisada** con embeddings **DINOv3** + K-Means (robusta a cambios de ID).
 - **Homografía** de 7 puntos → coordenadas reales de cancha (cm), con error medio de 3.4 cm.
 - **Métricas y eventos**: posesión (total y cara a cara), goles y disparos atribuidos por dirección de ataque, control de espacio (Voronoi).
 - **Visualizaciones**: mapa de calor por equipo, gráfica de posesión, shot map, control de espacio y tarjeta-resumen del partido.
-- **Transparencia**: cada métrica reporta sus limitaciones y los sesgos detectados se documentan abiertamente (secciones 7 y 10).
 
-> Cumple los entregables de la convocatoria: flujo de procesamiento (§ 3.5.1), visualización, narrativa de datos (§ 3.5.2) y documentación (§ 3.5.4). La innovación sobre SAM 3 corresponde a la **integración con otros modelos** (§ 3.7.3).
+Resultado del partido analizado: 
+**1 gol del Equipo A**, que dominó el territorio y la actividad ofensiva, mientras el **Equipo B** fue más parejo en la disputa directa del balón.
+ 
+> *"El equipo B, aunque disputó el balón de forma pareja, el equipo A ganó territorio, tiro a gol y el gol."*.
 
 ## Arquitectura
 
